@@ -4,11 +4,11 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use regex::Regex;
 use std::collections::HashMap;
-use std::collections::BTreeMap;
 
 use chrono::prelude::*;
 
 use lazy_static::lazy_static;
+use crate::analysis::apisum::TokenApiSum;
 
 
 lazy_static! {
@@ -73,7 +73,8 @@ fn get_today_date_str()-> String{
 
 fn get_top_ten_token(mut tokens:HashMap<String,u32>){
     
-    let mut ten_token_map:BTreeMap<String,u32> = BTreeMap::new();
+    let mut ten_token_people:Vec<TokenApiSum> = Vec::new();
+
     
     for _ in 0..10 {
         
@@ -87,13 +88,16 @@ fn get_top_ten_token(mut tokens:HashMap<String,u32>){
                 max_value = tt;
             }
         }
-        ten_token_map.insert(String::from(&remove_key), max_value);
+
+        let token = String::from(&remove_key);
+        let max_apisum_struct = TokenApiSum::new(token,max_value);
+        ten_token_people.push(max_apisum_struct);
         tokens.remove(remove_key.as_str());
     }
-    println!("ten_token_map:{:?}",ten_token_map);
+    // println!("ten_token_map:{:?}",ten_token_people);
     
-    for (key,value) in ten_token_map {
-        println!("top ten key:{} value:{}",key,value);
+    for item in ten_token_people {
+        println!("top ten people:{:?}",item);
     }
 
     
