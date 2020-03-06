@@ -45,7 +45,7 @@ pub fn get_today_gateway_files()->Vec<String>{
                 let filename = entry.file_name();
                 let filename:String = filename.into_string().unwrap();
                 let filename = filename.as_str();
-                println!("{:?}", entry.file_name());
+                // println!("{:?}", entry.file_name());
                 let today_str = get_today_date_str();
                 // let today_str = "2020-03-05".to_owned();
                 let today_file_prefix = "count_user.".to_owned()+&today_str;
@@ -90,10 +90,12 @@ fn get_top_ten_token(mut tokens:HashMap<String,u32>){
         ten_token_map.insert(String::from(&remove_key), max_value);
         tokens.remove(remove_key.as_str());
     }
+    println!("ten_token_map:{:?}",ten_token_map);
     
     for (key,value) in ten_token_map {
         println!("top ten key:{} value:{}",key,value);
     }
+
     
     
 }
