@@ -1,4 +1,5 @@
 #[derive(Debug)]
+//每个token对应的访问量 struct
 pub struct TokenApiSum {
     token: String,
     total: u32

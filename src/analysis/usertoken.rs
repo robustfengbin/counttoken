@@ -4,17 +4,16 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use regex::Regex;
 use std::collections::HashMap;
-
 use chrono::prelude::*;
-
 use lazy_static::lazy_static;
 use crate::analysis::apisum::TokenApiSum;
 
-
+//初始化正则表达式
 lazy_static! {
     static ref RE: Regex = Regex::new(r"Bearer\s\S+").unwrap();
 }
 
+//统计每个token对应访问API的数量
 pub fn statistic_tokens(){
     let files = get_today_gateway_files();
     let tokens_vec = sum_token(files);
@@ -35,8 +34,9 @@ pub fn statistic_tokens(){
     println!("共多少条记录:{}",k);
     get_top_ten_token(user_map);
 }
+
+//获取今天日志文件,只处理今天日志文件
 pub fn get_today_gateway_files()->Vec<String>{
-    // let  dir = "/Users/apple/logs/gw_cu/";
     let dir = "/home/blackvip/logs/gateway/";
     let mut files:Vec<String> = Vec::new();
     if let Ok(entries) = fs::read_dir(dir) {
@@ -45,9 +45,7 @@ pub fn get_today_gateway_files()->Vec<String>{
                 let filename = entry.file_name();
                 let filename:String = filename.into_string().unwrap();
                 let filename = filename.as_str();
-                // println!("{:?}", entry.file_name());
                 let today_str = get_today_date_str();
-                // let today_str = "2020-03-05".to_owned();
                 let today_file_prefix = "count_user.".to_owned()+&today_str;
                 let is_today_file = filename.starts_with(&today_file_prefix);
                 let current_file = filename.starts_with("count_user_token_file.log");
@@ -62,6 +60,7 @@ pub fn get_today_gateway_files()->Vec<String>{
     files
 }
 
+//获取今天日期,返回格式:2020-02-16
 fn get_today_date_str()-> String{
     let local: DateTime<Local> = Local::now();
     let datastr = local.date().to_string();
@@ -70,14 +69,10 @@ fn get_today_date_str()-> String{
 }
 
 
-
+//获取排行访问量前10的token
 fn get_top_ten_token(mut tokens:HashMap<String,u32>){
-    
     let mut ten_token_people:Vec<TokenApiSum> = Vec::new();
-
-    
     for _ in 0..10 {
-        
         let  mut max_value:u32 = 0;
         let mut remove_key = String::new();
         for (ke,val)in &tokens {
@@ -88,22 +83,17 @@ fn get_top_ten_token(mut tokens:HashMap<String,u32>){
                 max_value = tt;
             }
         }
-
         let token = String::from(&remove_key);
         let max_apisum_struct = TokenApiSum::new(token,max_value);
         ten_token_people.push(max_apisum_struct);
         tokens.remove(remove_key.as_str());
     }
-    // println!("ten_token_map:{:?}",ten_token_people);
-    
     for item in ten_token_people {
         println!("top ten people:{:?}",item);
     }
-
-    
-    
 }
 
+//统计每个token的总访问量
 fn sum_token(files:Vec<String>)->Vec<String>{
     let  mut   tokens_vec:Vec<String> = Vec::new();
     for file in files {
@@ -115,38 +105,31 @@ fn sum_token(files:Vec<String>)->Vec<String>{
     tokens_vec
 }
 
+//统计每个文件里每个token的访问量
 fn single_file_sum_token(file:String)->Vec<String>{
     let mut tokens:Vec<String> = Vec::new();
     let file = File::open(file).unwrap();
-    // println!("file===================>:{:?}",&file);
     let f = BufReader::new(file);
-    
     let mut  m = 0;
     for line in f.lines() {
         let line_str = line.unwrap();
         let line_tokens = reg_line(line_str);
         for i in line_tokens {
-            //    println!("1111111----->i:{}",i);
             tokens.push(i);
         }
-        // if m%1000== 0{
-        //     println!("执行完成1000条记录:{}",m);
-        // }
         m = m +1;
     }
     tokens
 }
 
+//按行分析是否匹配正则表达式的模式
 pub fn reg_line(line:String)->Vec<String>{
-    // let re = Regex::new(r"Bearer\s\S+").unwrap();
     let mut line_tokens:Vec<String> = Vec::new();
     let mut i = 0;
     for caps in RE.captures_iter(line.as_str()) {
         let token = caps.get(0).unwrap().as_str();
-        // println!("token********=>{}",token);
         line_tokens.push(token.to_owned());
         i  = i+1;
-        
     }
     line_tokens
     
