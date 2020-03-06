@@ -4,6 +4,7 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use regex::Regex;
 use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use chrono::prelude::*;
 
@@ -31,12 +32,12 @@ pub fn statistic_tokens(){
             user_map.insert(t, 1);
         }
     }
-    println!("k:{}",k);
+    println!("共多少条记录:{}",k);
     get_top_ten_token(user_map);
 }
 pub fn get_today_gateway_files()->Vec<String>{
-    let  dir = "/Users/apple/logs/gw_cu/";
-    // let dir = "/home/blackvip/logs/gateway/";
+    // let  dir = "/Users/apple/logs/gw_cu/";
+    let dir = "/home/blackvip/logs/gateway/";
     let mut files:Vec<String> = Vec::new();
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries {
@@ -45,13 +46,13 @@ pub fn get_today_gateway_files()->Vec<String>{
                 let filename:String = filename.into_string().unwrap();
                 let filename = filename.as_str();
                 println!("{:?}", entry.file_name());
-                // let today_str = get_today_date_str();
-                let today_str = "2020-03-05".to_owned();
+                let today_str = get_today_date_str();
+                // let today_str = "2020-03-05".to_owned();
                 let today_file_prefix = "count_user.".to_owned()+&today_str;
                 let is_today_file = filename.starts_with(&today_file_prefix);
                 let current_file = filename.starts_with("count_user_token_file.log");
                 if is_today_file||current_file{
-                    println!(" need perform file====>filename:{}",filename);
+                    println!(" 需要分析的日志文件====>filename:{}",filename);
                     let fullpathfile = dir.to_owned()+filename;
                     files.push(fullpathfile);
                 }
@@ -72,7 +73,7 @@ fn get_today_date_str()-> String{
 
 fn get_top_ten_token(mut tokens:HashMap<String,u32>){
     
-    let mut ten_token_map:HashMap<String,u32> = HashMap::new();
+    let mut ten_token_map:BTreeMap<String,u32> = BTreeMap::new();
     
     for _ in 0..10 {
         
@@ -111,7 +112,7 @@ fn sum_token(files:Vec<String>)->Vec<String>{
 fn single_file_sum_token(file:String)->Vec<String>{
     let mut tokens:Vec<String> = Vec::new();
     let file = File::open(file).unwrap();
-    println!("file===================>:{:?}",&file);
+    // println!("file===================>:{:?}",&file);
     let f = BufReader::new(file);
     
     let mut  m = 0;
