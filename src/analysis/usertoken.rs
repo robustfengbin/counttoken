@@ -7,6 +7,13 @@ use std::collections::HashMap;
 
 use chrono::prelude::*;
 
+use lazy_static::lazy_static;
+
+
+lazy_static! {
+    static ref RE: Regex = Regex::new(r"Bearer\s\S+").unwrap();
+}
+
 pub fn statistic_tokens(){
     let files = get_today_gateway_files();
     let tokens_vec = sum_token(files);
@@ -29,6 +36,7 @@ pub fn statistic_tokens(){
 }
 pub fn get_today_gateway_files()->Vec<String>{
     let  dir = "/Users/apple/logs/gw_cu/";
+    // let dir = "/home/blackvip/logs/gateway/";
     let mut files:Vec<String> = Vec::new();
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries {
@@ -37,7 +45,8 @@ pub fn get_today_gateway_files()->Vec<String>{
                 let filename:String = filename.into_string().unwrap();
                 let filename = filename.as_str();
                 println!("{:?}", entry.file_name());
-                let today_str = get_today_date_str();
+                // let today_str = get_today_date_str();
+                let today_str = "2020-03-05".to_owned();
                 let today_file_prefix = "count_user.".to_owned()+&today_str;
                 let is_today_file = filename.starts_with(&today_file_prefix);
                 let current_file = filename.starts_with("count_user_token_file.log");
@@ -108,25 +117,24 @@ fn single_file_sum_token(file:String)->Vec<String>{
     let mut  m = 0;
     for line in f.lines() {
         let line_str = line.unwrap();
-        // println!("0000000----->lien is:{}", line_str);
         let line_tokens = reg_line(line_str);
         for i in line_tokens {
             //    println!("1111111----->i:{}",i);
             tokens.push(i);
         }
-        if m%1000== 0{
-            println!("执行完成1000条记录:{}",m);
-        }
+        // if m%1000== 0{
+        //     println!("执行完成1000条记录:{}",m);
+        // }
         m = m +1;
     }
     tokens
 }
 
 pub fn reg_line(line:String)->Vec<String>{
-    let re = Regex::new(r"Bearer\s\S+").unwrap();
+    // let re = Regex::new(r"Bearer\s\S+").unwrap();
     let mut line_tokens:Vec<String> = Vec::new();
     let mut i = 0;
-    for caps in re.captures_iter(line.as_str()) {
+    for caps in RE.captures_iter(line.as_str()) {
         let token = caps.get(0).unwrap().as_str();
         // println!("token********=>{}",token);
         line_tokens.push(token.to_owned());
